@@ -24,8 +24,6 @@ namespace XOClassLibrary
                     Player2 = new User(Game.MarkType.O);
                     break;
             }
-            //UserMark = mark;
-            //ComputerMark = UserMark == Game.MarkType.X ? Game.MarkType.O : Game.MarkType.X;
         }
 
         public int BoardSize { get; }

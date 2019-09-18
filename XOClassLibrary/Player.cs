@@ -9,7 +9,7 @@ namespace XOClassLibrary
             Mark = mark;
         }
 
-        public abstract bool TryMakeTurn(Game game, (int row, int column) coords);
+        public abstract bool TryMakeTurn(Board board, (int row, int column) coords);
 
         public Game.MarkType Mark { get; }
     }
@@ -18,11 +18,11 @@ namespace XOClassLibrary
     {
         public User(Game.MarkType mark) : base(mark) { }
 
-        public override bool TryMakeTurn(Game game, (int row, int column) coords)
+        public override bool TryMakeTurn(Board board, (int row, int column) coords)
         {
             while (true)
             {
-                bool result = game.Board.Fields[coords.row, coords.column].TrySetMark(this.Mark);
+                bool result = board.Fields[coords.row, coords.column].TrySetMark(this.Mark);
                 return result;
             }
         }
@@ -32,9 +32,9 @@ namespace XOClassLibrary
     {
         public Computer(Game.MarkType mark) : base(mark) { }
 
-        public override bool TryMakeTurn(Game game, (int row, int column) coords)
+        public override bool TryMakeTurn(Board board, (int row, int column) coords)
         {
-            bool result = game.Board.Fields[coords.row, coords.column].TrySetMark(this.Mark);
+            bool result = board.Fields[coords.row, coords.column].TrySetMark(this.Mark);
             return result;
         }
     }
