@@ -8,29 +8,18 @@ namespace XOClassLibrary
     {
         public Game(GameParams gameParams)
         {
-            User = new Player(gameParams.UserMark);
-            Computer = new Player(gameParams.ComputerMark);
+            Player1 = gameParams.Player1;
+            Player2 = gameParams.Player2;
             Board = new Board(gameParams.BoardSize);
-            CurrentState = GameState.Waiting;
+            CurrentMode = gameParams.GameMode;
         }
 
-        //public void Start()
-        //{
-        //    CurrentState = GameState.Playing;
-        //    while (true)
-        //    {
+        public enum MarkType { X, O }
+        public enum Mode { UserVsComputer, ComputerVsComputer, UserVsUser }
 
-        //        break;
-        //    }
-        //    CurrentState = GameState.Waiting;
-        //}
-
-        private enum GameState { Waiting, Playing }
-        public enum MarkType { X = 0, O }
-
-        public Player User { get; }
-        public Player Computer { get; }
+        public Player Player1 { get; }
+        public Player Player2 { get; }
         public Board Board { get; }
-        private GameState CurrentState { get; set; }
+        public Mode CurrentMode { get; }
     }
 }

@@ -17,98 +17,141 @@ namespace xo
             while (true)
             {
                 var boardSize = 3; // EnterBoardSize();
-                var userMark = ChooseMark();
+                var gameMode = ChooseGameMode();
+                Game.MarkType? userMark = null;
+                if (gameMode == Game.Mode.UserVsComputer)
+                    userMark = ChooseMark();
 
-                Game = new Game(new GameParams(boardSize, userMark));
+                Game = new Game(new GameParams(boardSize, gameMode, userMark));
 
-                Game.MarkType lastSetMark = Game.MarkType.O;
-                int turnsCounter = 0;
-                if (Game.User.Mark == Game.MarkType.X)
-                {
-                    lastSetMark = UserTurn();
-                    Update();
-                    ++turnsCounter;
-                }
+                if (Start()) 
+                    return;
+            }
+        }
 
+        public static bool Start()
+        {
+            bool gameFinished = false;
+            Game.MarkType lastSetMark = Game.MarkType.O;
+            int turnsCounter = 0;
+            if (Game.Player1.Mark == Game.MarkType.X)
+            {
                 while (true)
                 {
-                    if (lastSetMark == Game.User.Mark)
-                        lastSetMark = ComputerTurn();
-                    else
-                        lastSetMark = UserTurn();
-
-                    Update();
-                    ++turnsCounter;
-                    if (Game.Board.IsThereWin())
-                    {
-                        DrawBoard();
-                        DrawMarks();
-                        if (lastSetMark == Game.User.Mark)
-                            Console.WriteLine("You Won!");
-                        else
-                            Console.WriteLine("Computer Won!");
-
-
-                        Console.WriteLine("[R]estart [Q]uit");
-                        while (true)
-                        {
-                            var cki = Console.ReadKey();
-                            if (cki.Key == ConsoleKey.R)
-                                break;
-                            else if (cki.Key == ConsoleKey.Q)
-                                return;
-                            else
-                                continue;
-                        }
+                    var coords = GetCoords(Game.Player1);
+                    if (Game.Player1.TryMakeTurn(Game, coords))
                         break;
-                    }
-                    else
-                    {
-                        if (turnsCounter == 9)
-                        {
-                            Console.WriteLine("Tie!");
-                            Console.ReadLine();
-                            break;
-                        }
-                    }
                 }
-            }
-        }
+                lastSetMark = Game.Player1.Mark;
 
-        public static Game.MarkType UserTurn()
-        {
+                Update();
+                DrawTip();
+                ++turnsCounter;
+            }
+
             while (true)
             {
-                (int Row, int Column) field = EnterFieldToMark();
-                bool result = Game.Board.Fields[field.Row, field.Column].TrySetMark(Game.User.Mark);
-                if (result)
-                    return Game.User.Mark;
+                if (lastSetMark == Game.Player1.Mark)
+                {
+                    while (true)
+                    {
+                        var coords = GetCoords(Game.Player2);
+                        if (Game.Player2.TryMakeTurn(Game, coords))
+                            break;
+                    }
+                    lastSetMark = Game.Player2.Mark;
+                }
                 else
-                    continue;
+                {
+                    while (true)
+                    {
+                        var coords = GetCoords(Game.Player1);
+                        if (Game.Player1.TryMakeTurn(Game, coords))
+                            break;
+                    }
+                    lastSetMark = Game.Player1.Mark;
+                }
+
+                Update();
+                ++turnsCounter;
+                if (Game.Board.IsThereWin())
+                {
+                    gameFinished = true;
+                    if (lastSetMark == Game.Player1.Mark)
+                        Console.WriteLine($"{Game.Player1.Mark.ToString()} Won!");
+                    else
+                        Console.WriteLine($"{Game.Player2.Mark.ToString()} Won!");
+                }
+                else
+                {
+                    if (turnsCounter == 9)
+                    {
+                        gameFinished = true;
+                        Console.WriteLine("Tie!");
+                    }
+                }
+
+                if (gameFinished)
+                {
+                    Console.WriteLine("[R]estart [Q]uit");
+                    while (true)
+                    {
+                        var cki = Console.ReadKey();
+                        if (cki.Key == ConsoleKey.R)
+                            return false;
+                        else if (cki.Key == ConsoleKey.Q)
+                            return true;
+                        else
+                            continue;
+                    }
+                }  
             }
+            return false;
         }
 
-        public static Game.MarkType ComputerTurn()
+        public static (int row, int column) GetCoords(Player player)
         {
-            while (true)
+            if (player is User)
+            {
+                return EnterFieldToMark();
+            }
+            else
             {
                 int row = Random.Next(Game.Board.Size);
                 int column = Random.Next(Game.Board.Size);
-                bool result = Game.Board.Fields[row, column].TrySetMark(Game.Computer.Mark);
-                if (result)
-                    return Game.Computer.Mark;
-                else
-                    continue;
+                return (row, column);
+            }
+        }
+
+        public static Game.Mode ChooseGameMode()
+        {
+            Console.Clear();
+            Console.WriteLine("Choose game mode:");
+            Console.WriteLine("User [V]s computer\t[C]omputer Vs computer\t[U]ser Vs user");
+            while (true)
+            {
+                var cki = Console.ReadKey();
+                switch (cki.Key)
+                {
+                    case ConsoleKey.V:
+                        return Game.Mode.UserVsComputer;
+                    case ConsoleKey.C:
+                        return Game.Mode.ComputerVsComputer;
+                    case ConsoleKey.U:
+                        return Game.Mode.UserVsUser;
+                    default:
+                        break;
+                }
             }
         }
 
         public static Game.MarkType ChooseMark()
         {
+            Console.Clear();
+            Console.WriteLine("Choose your mark:");
+            Console.WriteLine("X\t O");
             while (true)
             {
-                Console.Clear();
-                Console.WriteLine("Choose your mark:");
-                Console.WriteLine("X\t O");
                 var cki = Console.ReadKey();
                 if (cki.Key == ConsoleKey.X)
                     return Game.MarkType.X;
@@ -121,10 +164,10 @@ namespace xo
 
         public static int EnterBoardSize()
         {
+            Console.Clear();
+            Console.WriteLine("Choose board size, more than 1, less than 10:");
             while (true)
             {
-                Console.Clear();
-                Console.WriteLine("Choose board size, more than 1, less than 10:");
                 var cki = Console.ReadKey();
                 if (int.TryParse(cki.KeyChar.ToString(), out int size))
                     return size;
@@ -137,7 +180,6 @@ namespace xo
         {
             DrawBoard();
             DrawMarks();
-            DrawTip();
         }
 
         public static void DrawBoard()
