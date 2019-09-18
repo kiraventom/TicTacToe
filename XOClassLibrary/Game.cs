@@ -8,7 +8,7 @@ namespace XOClassLibrary
     {
         public Game(GameParams gameParams)
         {
-            User = new Player(gameParams.PlayerMark);
+            User = new Player(gameParams.UserMark);
             Computer = new Player(gameParams.ComputerMark);
             Board = new Board(gameParams.BoardSize);
             CurrentState = GameState.Waiting;
