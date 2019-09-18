@@ -114,14 +114,11 @@ namespace xo
 
         public (int row, int column) GetCoords(Player player, Board board)
         {
-            
             if (player is User)
                 return ChooseFieldToMark(board);
             else 
             {
-                int row = Random.Next(board.Size);
-                int column = Random.Next(board.Size);
-                return (row, column);
+                return (player as Computer).ChooseFieldToMark(board);
             }
         }
 
@@ -180,13 +177,14 @@ namespace xo
 
         public void Update(Board board)
         {
+            Console.Clear();
+            DrawTip();
             DrawBoard();
             DrawMarks(board);
         }
 
         public void DrawBoard()
         {
-            Console.Clear();
             Console.WriteLine("    1   2   3");
             Console.WriteLine("  \u250c\u2500\u2500\u2500\u252c\u2500\u2500\u2500\u252c\u2500\u2500\u2500\u2510");
             Console.WriteLine($"1 \u2502   \u2502   \u2502   \u2502");
@@ -205,22 +203,21 @@ namespace xo
                 for (int j = 0; j < board.Size; ++j)
                 {
                     marks[i, j] = board.Fields[i, j].ToString();
-                    Console.SetCursorPosition((j + 1) * 4 , (i + 1) * 2);
+                    Console.SetCursorPosition((j + 1) * 4 , (int)((i + 1.5) * 2));
                     Console.Write(marks[i, j]);
                 }
             }
-            Console.SetCursorPosition(0, 8);
+            Console.SetCursorPosition(0, 9);
         }
 
-        //public void DrawTip()
-        //{
-        //    Console.WriteLine();
-        //    Console.WriteLine("Use arrows to move cursor, press Enter to enter mark");
-        //}
+        public void DrawTip()
+        {
+            Console.WriteLine("Use arrows to move cursor, press Enter to enter mark");
+        }
 
         public (int Row, int Column) ChooseFieldToMark(Board board)
         {
-            (int left, int top) currentPosition = (4, 2);
+            (int left, int top) currentPosition = (4, 3);
             Update(board);
             while (true)
             {
@@ -238,15 +235,15 @@ namespace xo
                             currentPosition.left -= 4;
                         break;
                     case ConsoleKey.UpArrow:
-                        if (currentPosition.top > 2)
+                        if (currentPosition.top > 3)
                             currentPosition.top -= 2;
                         break;
                     case ConsoleKey.DownArrow:
-                        if (currentPosition.top < 6)
+                        if (currentPosition.top < 7)
                             currentPosition.top += 2;
                         break;
                     case ConsoleKey.Enter:
-                        return ((currentPosition.top / 2) - 1, (currentPosition.left / 4) - 1);
+                        return ((currentPosition.top - 3) / 2, (currentPosition.left / 4) - 1);
                     default:
                         break;
 
